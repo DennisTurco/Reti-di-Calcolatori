@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 
-# Nome Cognome
-# data 
+# Dennis Turco
+# date:  
 # summary
 
 from socket import *
 import sys, time
 import optparse
 
+name = "Dennis"
+surname = "Turco"
 
 parser = optparse.OptionParser()
-parser.add_option('-s', '--server',   dest="server",  default="", help="nome del server (default localhost)" )
-parser.add_option('-p', '--port',     dest="port",    default=25000, type=int, help="porta di ascolto del server" )
-parser.add_option('-b', '--bufsize',  dest="bufsize", default=100,  type=int, help="dimensione buffer di spedizione" )
+parser.add_option('-s', '--server',   dest="server",  default="", help="server name (default localhost)" )
+parser.add_option('-p', '--port',     dest="port",    default=25000, type=int, help="server listening port" )
+parser.add_option('-b', '--bufsize',  dest="bufsize", default=100,  type=int, help="delivery buffer size" )
 options, remainder = parser.parse_args()
 print ("OPTIONS  server:", options.server, " - port:", options.port, " - bufsize:", options.bufsize)
 
@@ -21,13 +23,13 @@ s = socket(AF_INET, SOCK_DGRAM)
 
 ta = time.time()
 
-#Len = s.sendto("hello from Nome Cognome, in python",addr) 
-Len=s.sendto("hello".encode('utf-8'), addr) 
+Len = s.sendto(f"hello from {name} {surname}, in python",addr) 
+Len = s.sendto("hello".encode('utf-8'), addr) 
 
 print ("sent ", Len, " Bytes \n")
 
 tb = time.time()
-print ("tempo :", tb-ta)
+print ("time :", tb-ta)
 
 s.close()
 

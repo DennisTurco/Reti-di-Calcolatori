@@ -12,7 +12,7 @@ from socket import *
 parser = optparse.OptionParser()
 parser.add_option('-p', '--port',     dest="port", default=25000,  type=int  )
 parser.add_option('-s', '--server',   dest="server", default="0.0.0.0", )
-parser.add_option('-b', '--bufsize',  dest="bufsize", default=1024,  type=int , help="dimensione buffer" )
+parser.add_option('-b', '--bufsize',  dest="bufsize", default=1024,  type=int , help="buffer size" )
 options, remainder = parser.parse_args()
 
 print("   port:", options.port, "  server:", options.server, "bufsize:",options.bufsize)

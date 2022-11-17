@@ -1,8 +1,8 @@
 # Author: Dennis Turco
-# compile: nano python gethostbyaddr.py ip_address
-# example: nano python gethostbyaddr.py 142.250.184.36
+# compile: sudo python gethostbyaddr.py ip_address
+# example: sudo python gethostbyaddr.py 142.250.184.36
 
-# Note: nano command is nedded for read/write into file "/etc/hosts"
+# Note: sudo command is nedded for read/write into file "/etc/hosts"
 
 import socket  # socket library
 import sys  # sys library for get parameters from command line

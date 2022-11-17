@@ -1,8 +1,8 @@
 # Author: Dennis Turco
-# compile: nano python gethostbyname.py nost_name
-# example: nano python gethostbyname.py www.google.com
+# compile: sudo python gethostbyname.py nost_name
+# example: sudo python gethostbyname.py www.google.com
 
-# Note: nano command is nedded for read/write into file "/etc/hosts"
+# Note: sudo command is nedded for read/write into file "/etc/hosts"
 
 import socket  # socket library
 import sys  # sys library for get parameters from command line
@@ -36,7 +36,7 @@ def find_host_by_name(host):
         if len(line.split()) > 0: # this if is required for avoid error "index out of range" on "line.split()[0]"
             if name == line.split()[1]: # host founded
                 print(f"name address: {name} founded in file {filename}")
-                return line.split()[1]  
+                return line.split()[0]  
 
         if len(line) == 1: # read of ipv4 host terminated
             host = add_host_by_name(name, data, counter) # host doesn't found, i have to add it

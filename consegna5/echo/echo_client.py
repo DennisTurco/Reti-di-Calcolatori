@@ -7,11 +7,13 @@ from socket import *
 import sys, time
 import optparse
 
+name = "Dennis"
+surname = "Turco"
 
 parser = optparse.OptionParser()
-parser.add_option('-s', '--server',  dest="server",  default="localhost", help="nome del server" )
-parser.add_option('-p', '--port',    dest="port",    type=int,  default=25000, help="porta di ascolto del server" )
-parser.add_option('-m', '--message', dest="message", default="hello from Dennis Turco, in python", help="messaggio da spedire" )
+parser.add_option('-s', '--server',  dest="server",  default="localhost", help="server name" )
+parser.add_option('-p', '--port',    dest="port",    type=int,  default=25000, help="server listening port" )
+parser.add_option('-m', '--message', dest="message", default=f"hello from {name} {surname}, in python", help="message to send" )
 options, remainder = parser.parse_args()
 print("OPTIONS  server:", options.server, " - port:", options.port, " - message:", options.message)
 
