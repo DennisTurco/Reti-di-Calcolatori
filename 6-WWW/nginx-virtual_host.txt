@@ -1,0 +1,60 @@
+Autore: Dennis Turco
+
+###################################### Virtual Host ###################################
+
+- Scrittura file html:
+	<!DOCTYPE html>
+	<html>
+		<head><title> Autore - Dennis Turco </title></head>
+		<body> 
+			<h1> TUTTO FUNZIONA PERFETTAMENTE!! </h1> 
+		</body>
+	</html>
+	
+	
+	
+- Configurazione:
+	dopo aver editato il file /etc/nginx/sites-available/default con:
+		listen 81;
+		server_name vh1;
+		root /var/www/vh1;
+	aggiunti nella sezione in basso del file, senza toccare la configurazione per il default server
+	
+	....
+	....
+	# Virtual Host configuration for example.com
+	#
+	# You can move that to a different file under sites-available/ and symlink that
+	# to sites-enabled/ to enable it.
+	#
+	server {
+        	listen 81;
+		listen [::]:81;
+
+		server_name vh1;
+
+		root /var/www/vh1;
+		index index.html;
+
+		location / {
+		        try_files $uri $uri/ =404;
+		}
+	}
+
+	
+	
+	
+	sudo mkdir -p /var/www/vh1
+	cd /var/www/vh1
+	sudo nano index.html
+	sudo service nginx restart
+	sudo curl http://localhost:81
+	
+	output:	
+		<!DOCTYPE html>
+		<html>
+			<head><title> Autore - Dennis Turco </title></head>
+			<body> 
+				<h1> TUTTO FUNZIONA PERFETTAMENTE!! </h1> 
+			</body>
+		</html>

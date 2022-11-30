@@ -1,0 +1,64 @@
+Autore: Dennis Turco
+
+############################################## PHP ###################################
+
+- Installazioni e Configurazione:
+	1. innanzitutto scarico php-fpm con: sudo apt install php-fpm
+	2. ho modificato il file "/etc/nginx/sites-available/default" con:
+		location ~ .php$ {
+			include snippets/fastcgi-php.conf;
+			fastcgi_pass unix:/var/run/php/php-fpm.sock;
+		}
+	3. ho quindi scaricato i file presenti in: http://didattica-linux.unipr.it/~roberto.alfieri@unipr.it/matdid/RETI/http/php/ e li ho inseriti nella cartella "/var/www/vh1" tramite il comando wget
+
+- Test sul funzionamento:
+	sudo curl http://localhost:81/cookie1.php
+	
+	output:
+		<HTML><BODY>Server: 160.78.50.165 - Client Address: 160.78.143.4 - User Agent: Wget/1.21 - 30 Nov 2022 12:51:56<p> str1 not set<p></BODY></HTML>
+
+
+
+############################################## AUTENTICAZIONE DI BASE ###################################
+
+- Installazioni e Configurazione:
+	1. ho installato apache2-utils con: sudo apt install apache2-utils
+	2. sudo htpasswd -c /etc/nginx/.htpasswd ubuntu --> ho messo password "ubuntu" 
+	3. ho editato "/etc/nginx/sites-available/default" con:
+		location /secure {
+			try_files $uri $uri/ =404;
+			auth_basic "Secure area";
+			auth_basic_user_file /etc/nginx/.htpasswd;
+		}
+		
+		
+		....
+		....
+		# Virtual Host configuration for example.com
+		#
+		# You can move that to a different file under sites-available/ and symlink that
+		# to sites-enabled/ to enable it.
+		#
+		server {
+			listen 81;
+			listen [::]:81;
+
+			server_name vh1;
+
+			root /var/www/vh1;
+			index index.html;
+
+			location /secure {
+				try_files $uri $uri/ =404;
+				auth_basic "Secure area";
+				auth_basic_user_file /etc/nginx/.htpasswd;
+                	}
+		}
+		
+	4. ho creato la cartella "secure" con: sudo mkdir -p /var/www/html/secure/
+	5. ho creto un file "index.html" con: sudo nano /var/www/html/secure/index.html 
+	   (il cui contenuto e` esattamente quello della consegna "nginx-virtual_host.txt")
+	6. l'ho aperto tramite firefox.
+
+- 
+
