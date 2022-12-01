@@ -44,17 +44,17 @@ Autore: Dennis Turco
 	
 	
 	
-	sudo mkdir -p /var/www/vh1
-	cd /var/www/vh1
-	sudo nano index.html
-	sudo service nginx restart
-	sudo curl http://localhost:81
+	- sudo mkdir -p /var/www/vh1
+	- cd /var/www/vh1
+	- sudo nano index.html
+	- sudo service nginx restart
+	- sudo curl http://localhost:81
 	
-	output:	
-		<!DOCTYPE html>
-		<html>
-			<head><title> Autore - Dennis Turco </title></head>
-			<body> 
-				<h1> TUTTO FUNZIONA PERFETTAMENTE!! </h1> 
-			</body>
-		</html>
+		output:	
+			<!DOCTYPE html>
+			<html>
+				<head><title> Autore - Dennis Turco </title></head>
+				<body> 
+					<h1> TUTTO FUNZIONA PERFETTAMENTE!! </h1> 
+				</body>
+			</html>

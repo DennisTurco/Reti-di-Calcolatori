@@ -1,0 +1,35 @@
+Autore = Dennis Turco
+
+################################################## CLIENT #############################################
+
+- Scrittura programma:
+    nel file "test.py" scrivo il seguente programma in python:
+        
+        import http.client
+
+        # apro la connessione
+        conn = http.client.HTTPSConnection("localhost:80")
+        conn.request("GET", "/")
+
+        # stampo informazioni sulla connessione
+        response = conn.getresponse()
+        print (f"Server status: {response.status} \treason: {response.reason}")
+
+        # ottengo e stampo in risultato della richiesta
+        data = response.read()
+        print(data)
+
+        # chiudo la connessione
+        conn.close()
+
+    Non ho utilizzato la libreria "httplib" perchè per qualche ragione
+    non mi funzione, (forse devo installarla) ma non mi importa perchè posso usare
+    la libreria "http.client" che funziona altrettanto bene.
+
+    Per eseguire il programma è necessario prima avviare il servizio nginx con:
+    sudo service nginx start.
+
+    avviare il programma con: python3 test.py
+
+    Esso eseguirà (se l'operazione avrà successo) la "GET" del contenuto della dyrectory
+    "/var/www/html"
