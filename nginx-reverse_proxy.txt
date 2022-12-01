@@ -1,0 +1,73 @@
+Autore = Dennis Turco
+
+############################### REVERSE PROXY ####################################
+
+- Installazioni e Configurazione:
+	intallazione server Nginx:
+	- sudo apt get update
+	- sudo apt-get install nginx openssl
+	- modificare il file "/etc/nginx/sites-available/default" aggiungendo 
+	  la stringa "proxy_pass http://localhost:81;" (al posto di 192.168.100.9
+	  metto localhost:81) (possibile anche inserire un altro tipo di indirizzo) con: 
+		sudo nano /etc/nginx/sites-available/default
+		
+	  diventera` quindi:
+	  	....
+	  	....
+	  	server {
+        		listen 80 default_server;
+                        listen [::]:80 default_server;  
+  
+			root /var/www/html;     
+
+			index index.html index.htm index.nginx-debian.html;
+
+			server_name _;
+
+			location / {
+				proxy_pass http://localhost:81;
+				try_files $uri $uri/ =404;
+
+			}
+		...
+		...
+		
+- Esecuzione:
+	- riavviare con: sudo service nginx restart
+	- a questo punto con il comando: sudo curl http://localhost:80 stampera`:
+		<html>
+			<head>
+				<title> Autore - Dennis Turco </title>
+			</head>
+			<body>
+			<h1> E' tutto funzionante!!! </h1>
+			</body>
+		</html>
+	
+	- se non avessi attivato il Reverse Proxy con lo stesso comando avrebbe stampato:
+		<!DOCTYPE html>
+		<html>
+		<head>
+		<title>Welcome to nginx!</title>
+		<style>
+		    body {
+			width: 35em;
+			margin: 0 auto;
+			font-family: Tahoma, Verdana, Arial, sans-serif;
+		    }
+		</style>
+		</head>
+		<body>
+		<h1>Welcome to nginx!</h1>
+		<p>If you see this page, the nginx web server is successfully installed and
+		working. Further configuration is required.</p>
+
+		<p>For online documentation and support please refer to
+		<a href="http://nginx.org/">nginx.org</a>.<br/>
+		Commercial support is available at
+		<a href="http://nginx.com/">nginx.com</a>.</p>
+
+		<p><em>Thank you for using nginx.</em></p>
+		</body>
+		</html>
+
