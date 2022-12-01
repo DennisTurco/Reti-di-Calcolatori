@@ -1,0 +1,40 @@
+Autore = Dennis Turco
+
+############################### REVERSE PROXY ####################################
+
+- Installazioni e Configurazione:
+	intallazione server Nginx:
+	- sudo apt get update
+	- sudo apt-get install nginx openssl
+	- modificare il file "/etc/nginx/sites-available/default" aggiungendo 
+	  la stringa "proxy_pass http://192.168.100.9;" (possibile anche inserire
+	  un altro tipo di indirizzo) con: 
+		sudo nano /etc/nginx/sites-available/default
+		
+	  diventera` quindi:
+	  	....
+	  	....
+	  	server {
+        		listen 80 default_server;
+                        listen [::]:80 default_server;  
+  
+			root /var/www/html;     
+
+			index index.html index.htm index.nginx-debian.html;
+
+			server_name _;
+
+			location / {
+				proxy_pass http://192.168.100.9;
+				try_files $uri $uri/ =404;
+
+			}
+		...
+		...
+		
+- Esecuzione:
+	- riavviare con: sudo service nginx restart
+	- Aprire il browser e immettere l' indirizzo IP del server Web.
+	  Nell' esempio impostato, il seguente URL e` stato immesso nel browser:
+	  	http://192.168.100.9
+	  Il server Nginx funziona quindi come proxy e visualizza il sito Web bel server Apache.
