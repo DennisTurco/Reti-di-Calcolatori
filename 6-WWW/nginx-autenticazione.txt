@@ -1,0 +1,43 @@
+Autore = Dennis Turco
+
+############################################## AUTENTICAZIONE DI BASE ###################################
+
+- Installazioni e Configurazione:
+	1. ho installato apache2-utils con: sudo apt install apache2-utils
+	2. sudo htpasswd -c /etc/nginx/.htpasswd ubuntu --> ho messo password "ubuntu" 
+	3. ho editato "/etc/nginx/sites-available/default" con:
+		location /secure {
+			try_files $uri $uri/ =404;
+			auth_basic "Secure area";
+			auth_basic_user_file /etc/nginx/.htpasswd;
+		}
+		
+		
+		....
+		....
+		# Virtual Host configuration for example.com
+		#
+		# You can move that to a different file under sites-available/ and symlink that
+		# to sites-enabled/ to enable it.
+		#
+		server {
+			listen 81;
+			listen [::]:81;
+
+			server_name vh1;
+
+			root /var/www/vh1;
+			index index.html;
+
+			location /secure {
+				try_files $uri $uri/ =404;
+				auth_basic "Secure area";
+				auth_basic_user_file /etc/nginx/.htpasswd;
+                	}
+		}
+		
+	4. ho creato la cartella "secure" con: sudo mkdir -p /var/www/html/secure/
+	5. ho creto un file "index.html" con: sudo nano /var/www/html/secure/index.html 
+	   (il cui contenuto e` esattamente quello della consegna "nginx-virtual_host.txt")
+	6. Per poter accedere è richiesta l'autenticazione.
+
