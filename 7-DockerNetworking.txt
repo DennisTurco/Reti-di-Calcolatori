@@ -1,0 +1,287 @@
+Autore = Dennis Turco
+
+###################### Nginx: immagine nginx-net ######################
+- scarico l' immagine con il comando: sudo docker run -d --name nginx2 nginx
+ 	output:
+		Unable to find image 'nginx:latest' locally
+		latest: Pulling from library/nginx
+		025c56f98b67: Pull complete 
+		ca9c7f45d396: Pull complete 
+		ed6bd111fc08: Pull complete 
+		e25b13a5f70d: Pull complete 
+		9bbabac55ab6: Pull complete 
+		e5c9ba265ded: Pull complete 
+		Digest: sha256:1be46c8c343f08e2ac1cffc2e6c8679a6851a87b1bf16d8272e1835e2aa33ad1
+		Status: Downloaded newer image for nginx:latest
+		c53ed333e26230e6d859b64aae8ad48f3a94ca3aa5ea49a939571e02f05592ac
+
+- entro nell' immagine con il comando: sudo docker exec -it nginx2 bash
+	a questo punto eseguo alcuni comandi come da richiesta:
+		1. apt-get update -y
+		2. apt-get install -y net-tools iptables iproute2 nmap traceroute dnsutils iputils-ping
+		3. apt-get install -y tcpdump openssh-server nano python2
+		4. useradd debian -p $(openssl passwd -1 debian) -m
+		5. echo "ListenAddress 0.0.0.0">>/etc/ssh/sshd_config
+		6. service ssh start
+		7. exit
+		
+- eseguo la commit con: sudo docker commit nginx2 nginx-net
+
+- siccome non mi serve piu`, posso terminare nginx2 e rimuovere il container:
+        1. sudo docker stop nginx2
+        2. sudo docker rm nginx2
+
+###################### Nginx: creazione dei container ######################
+- creo la cartella che diventera` la root dei server nginx: sudo mkdir -p /home/ubuntu/NGINX
+- creo il file "prova.html": sudo touch /home/ubuntu/NGINX/prova.html
+- scrivo nel file "prova.html": echo "<H1> Documento di prova </H1>" > /home/ubuntu/NGINX/prova.html
+
+- a questo punto creo 3 container, ne condividiamo la root dir e su ognuno di essi startiamo ssh:
+        1. sudo docker run --privileged -d --name nginx2 -p 8002:80 -v /home/ubuntu/NGINX/:/usr/share/nginx/html:ro nginx-net
+        2. sudo docker run --privileged -d --name nginx3 -p 8003:80 -v /home/ubuntu/NGINX/:/usr/share/nginx/html:ro nginx-net
+        3. sudo docker run --privileged -d --name nginx4 -p 8004:80 -v /home/ubuntu/NGINX/:/usr/share/nginx/html:ro nginx-net
+
+        4. sudo docker exec -it nginx2 service ssh start
+        5. sudo docker exec -it nginx3 service ssh start
+        6. sudo docker exec -it nginx4 service ssh start
+        
+ - possibile verificare le immagini:
+        dennis@dennis-VirtualBox:/$ sudo docker images
+        REPOSITORY    TAG       IMAGE ID       CREATED          SIZE
+        nginx-net     latest    513d722aca8f   29 minutes ago   307MB
+        <none>        <none>    fe3d0588410d   29 minutes ago   307MB
+        nginx         latest    ac8efec875ce   7 hours ago      142MB
+        alpine        latest    9c6f07244728   3 months ago     5.54MB
+        hello-world   latest    feb5d9fea6a5   14 months ago    13.3kB
+        
+  - ... e i container:
+        dennis@dennis-VirtualBox:/$ sudo docker ps
+        CONTAINER ID   IMAGE       COMMAND                  CREATED          STATUS          PORTS                                   NAMES
+        3872c4146b0f   nginx-net   "/docker-entrypoint.…"   12 minutes ago   Up 12 minutes   0.0.0.0:8004->80/tcp, :::8004->80/tcp   nginx4
+        001bff676701   nginx-net   "/docker-entrypoint.…"   13 minutes ago   Up 13 minutes   0.0.0.0:8003->80/tcp, :::8003->80/tcp   nginx3
+        fc38fdbd2e6d   nginx-net   "/docker-entrypoint.…"   14 minutes ago   Up 14 minutes   0.0.0.0:8002->80/tcp, :::8002->80/tcp   nginx2
+
+
+###################### Nginx: test della configurazione di rete ######################
+
+> ssh debian@172.17.0.2
+	The authenticity of host '172.17.0.2 (172.17.0.2)' can't be established.
+	ED25519 key fingerprint is SHA256:z74MAGzmEUfnrJMUJKloKqcf5rTko+upqPOjEq2mRK8.
+	This key is not known by any other names
+	Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+	Warning: Permanently added '172.17.0.2' (ED25519) to the list of known hosts.
+	debian@172.17.0.2's password: 
+	Linux e7305301ddea 5.15.0-53-generic #59-Ubuntu SMP Mon Oct 17 18:53:30 UTC 2022 x86_64
+
+	The programs included with the Debian GNU/Linux system are free software;
+	the exact distribution terms for each program are described in the
+	individual files in /usr/share/doc/*/copyright.
+
+	Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+	permitted by applicable law.
+
+> curl http://172.17.0.2/prova.html --> (curl is  a  tool  for transferring data from or to a server)
+ 	<H1> Documento di prova </H1>
+
+nginx2> sudo docker exec -it nginx2 ping 172.17.0.3
+	PING 172.17.0.3 (172.17.0.3) 56(84) bytes of data.
+	64 bytes from 172.17.0.3: icmp_seq=1 ttl=64 time=0.064 ms
+	64 bytes from 172.17.0.3: icmp_seq=2 ttl=64 time=0.057 ms
+	64 bytes from 172.17.0.3: icmp_seq=3 ttl=64 time=0.049 ms
+	64 bytes from 172.17.0.3: icmp_seq=4 ttl=64 time=0.050 ms
+	64 bytes from 172.17.0.3: icmp_seq=5 ttl=64 time=0.045 ms
+	64 bytes from 172.17.0.3: icmp_seq=6 ttl=64 time=0.044 ms
+	64 bytes from 172.17.0.3: icmp_seq=7 ttl=64 time=0.048 ms
+	64 bytes from 172.17.0.3: icmp_seq=8 ttl=64 time=0.045 ms
+	64 bytes from 172.17.0.3: icmp_seq=9 ttl=64 time=0.058 ms
+	64 bytes from 172.17.0.3: icmp_seq=10 ttl=64 time=0.048 ms
+	...
+	...
+	--- 172.17.0.3 ping statistics ---
+	20 packets transmitted, 20 received, 0% packet loss, time 19445ms
+	rtt min/avg/max/mdev = 0.044/0.051/0.077/0.007 ms
+	
+nginx2> sudo docker exec -it nginx2 arp --> (manipulates or displays the kernel's IPv4 network neighbour cache)
+	Address                  HWtype  HWaddress           Flags Mask            Iface
+	172.17.0.1               ether   02:42:e3:eb:25:c0   C                     eth0
+	172.17.0.4               ether   02:42:ac:11:00:04   C                     eth0
+	172.17.0.3               ether   02:42:ac:11:00:03   C                     eth0
+
+	
+nginx2> sudo docker exec -it nginx2 netstat –tupan --> (Print network connections, routing tables, interface statistics, masquerade connections, and multicast memberships)
+	Active Internet connections (w/o servers)
+	Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+	tcp        0      0 e7305301ddea:ssh        172.17.0.1:33620        ESTABLISHED
+	Active UNIX domain sockets (w/o servers)
+	Proto RefCnt Flags       Type       State         I-Node   Path
+	unix  3      [ ]         STREAM     CONNECTED     46485    
+	unix  2      [ ]         STREAM     CONNECTED     46460    
+	unix  3      [ ]         STREAM     CONNECTED     43058    
+	unix  3      [ ]         STREAM     CONNECTED     46484    
+	unix  3      [ ]         STREAM     CONNECTED     43057 
+
+
+nginx2> sudo docker exec -it nginx2 nmap 172.17.0.0/24 --> (Network exploration tool and security / port scanner)
+	Starting Nmap 7.80 ( https://nmap.org ) at 2022-12-07 17:40 UTC
+	Nmap scan report for 172.17.0.1
+	Host is up (0.000066s latency).
+	Not shown: 999 filtered ports
+	PORT   STATE SERVICE
+	80/tcp open  http
+	MAC Address: 02:42:E3:EB:25:C0 (Unknown)
+
+	Nmap scan report for 172.17.0.3
+	Host is up (0.000011s latency).
+	Not shown: 998 closed ports
+	PORT   STATE SERVICE
+	22/tcp open  ssh
+	80/tcp open  http
+	MAC Address: 02:42:AC:11:00:03 (Unknown)
+
+	Nmap scan report for 172.17.0.4
+	Host is up (0.000015s latency).
+	Not shown: 998 closed ports
+	PORT   STATE SERVICE
+	22/tcp open  ssh
+	80/tcp open  http
+	MAC Address: 02:42:AC:11:00:04 (Unknown)
+
+	Nmap scan report for e7305301ddea (172.17.0.2)
+	Host is up (0.0000030s latency).
+	Not shown: 998 closed ports
+	PORT   STATE SERVICE
+	22/tcp open  ssh
+	80/tcp open  http
+
+	Nmap done: 256 IP addresses (4 hosts up) scanned in 19.46 seconds
+
+nginx2> sudo docker exec -it nginx2 ssh 172.17.0.3 -l debian
+
+	---> e contemporaneamente in un altro terminale:
+
+nginx3> sudo docker exec -it nginx3 tcpdump port 22 --> (dump traffic on a network)
+	tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+	listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+	18:01:31.362883 IP 172.17.0.1.33620 > 172.17.0.2.ssh: Flags [P.], seq 3786476476:3786476512, ack 610812148, win 501, options [nop,nop,TS val 245839074 ecr 2779265539], length 36
+	18:01:52.761526 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [S], seq 78505068, win 64240, options [mss 1460,sackOK,TS val 956966869 ecr 0,nop,wscale 7], length 0
+	18:01:52.761569 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [S.], seq 1437066957, ack 78505069, win 65160, options [mss 1460,sackOK,TS val 1398179161 ecr 956966869,nop,wscale 7], length 0
+	18:01:52.761622 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [.], ack 1, win 502, options [nop,nop,TS val 956966869 ecr 1398179161], length 0
+	18:01:52.788788 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 1:41, ack 1, win 510, options [nop,nop,TS val 1398179188 ecr 956966869], length 40: SSH: SSH-2.0-OpenSSH_8.4p1 Debian-5+deb11u1
+	18:01:52.788833 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [.], ack 41, win 502, options [nop,nop,TS val 956966896 ecr 1398179188], length 0
+	18:01:52.789290 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [P.], seq 1:41, ack 41, win 502, options [nop,nop,TS val 956966897 ecr 1398179188], length 40: SSH: SSH-2.0-OpenSSH_8.4p1 Debian-5+deb11u1
+	18:01:52.789293 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [.], ack 41, win 510, options [nop,nop,TS val 1398179189 ecr 956966897], length 0
+	18:01:52.794019 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [P.], seq 41:1553, ack 41, win 502, options [nop,nop,TS val 956966902 ecr 1398179189], length 1512
+	18:01:52.794027 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [.], ack 1553, win 501, options [nop,nop,TS val 1398179194 ecr 956966902], length 0
+	18:01:52.795160 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 41:1097, ack 1553, win 501, options [nop,nop,TS val 1398179195 ecr 956966902], length 1056
+	18:01:52.796710 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [P.], seq 1553:1601, ack 1097, win 501, options [nop,nop,TS val 956966904 ecr 1398179195], length 48
+	18:01:52.800726 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 1097:1653, ack 1601, win 501, options [nop,nop,TS val 1398179200 ecr 956966904], length 556
+	18:01:52.861802 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [.], ack 1653, win 501, options [nop,nop,TS val 956966967 ecr 1398179200], length 0
+	18:01:56.043014 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [P.], seq 1601:1617, ack 1653, win 501, options [nop,nop,TS val 956970151 ecr 1398179200], length 16
+	18:01:56.081568 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [.], ack 1617, win 501, options [nop,nop,TS val 1398182481 ecr 956970151], length 0
+	18:01:56.081630 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [P.], seq 1617:1661, ack 1653, win 501, options [nop,nop,TS val 956970189 ecr 1398182481], length 44
+	18:01:56.081632 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [.], ack 1661, win 501, options [nop,nop,TS val 1398182481 ecr 956970189], length 0
+	18:01:56.081678 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 1653:1697, ack 1661, win 501, options [nop,nop,TS val 1398182481 ecr 956970189], length 44
+	18:01:56.081689 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [.], ack 1697, win 501, options [nop,nop,TS val 956970189 ecr 1398182481], length 0
+	18:01:56.081728 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [P.], seq 1661:1729, ack 1697, win 501, options [nop,nop,TS val 956970189 ecr 1398182481], length 68
+	18:01:56.091115 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 1697:1749, ack 1729, win 501, options [nop,nop,TS val 1398182491 ecr 956970189], length 52
+	18:01:56.133439 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [.], ack 1749, win 501, options [nop,nop,TS val 956970241 ecr 1398182491], length 0
+	18:01:59.679662 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [P.], seq 1729:1877, ack 1749, win 501, options [nop,nop,TS val 956973787 ecr 1398182491], length 148
+	18:01:59.689126 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 1749:1777, ack 1877, win 501, options [nop,nop,TS val 1398186089 ecr 956973787], length 28
+	18:01:59.689157 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [.], ack 1777, win 501, options [nop,nop,TS val 956973797 ecr 1398186089], length 0
+	18:01:59.689951 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [P.], seq 1877:1989, ack 1777, win 501, options [nop,nop,TS val 956973797 ecr 1398186089], length 112
+	18:01:59.731387 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 1777:2405, ack 1989, win 501, options [nop,nop,TS val 1398186131 ecr 956973797], length 628
+	18:01:59.765406 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [.], ack 2405, win 501, options [nop,nop,TS val 956973873 ecr 1398186131], length 0
+	18:01:59.765417 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 2405:2449, ack 1989, win 501, options [nop,nop,TS val 1398186165 ecr 956973873], length 44
+	18:01:59.765430 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [.], ack 2449, win 501, options [nop,nop,TS val 956973873 ecr 1398186165], length 0
+	18:01:59.765498 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [P.], seq 1989:2365, ack 2449, win 501, options [nop,nop,TS val 956973873 ecr 1398186165], length 376
+	18:01:59.766338 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 2449:2557, ack 2365, win 501, options [nop,nop,TS val 1398186166 ecr 956973873], length 108
+	18:01:59.768325 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 2557:3033, ack 2365, win 501, options [nop,nop,TS val 1398186168 ecr 956973873], length 476
+	18:01:59.768355 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [.], ack 3033, win 501, options [nop,nop,TS val 956973876 ecr 1398186166], length 0
+	18:01:59.772633 IP a36aaff803f3.ssh > 172.17.0.2.56356: Flags [P.], seq 3033:3069, ack 2365, win 501, options [nop,nop,TS val 1398186172 ecr 956973876], length 36
+	18:01:59.818885 IP 172.17.0.2.56356 > a36aaff803f3.ssh: Flags [.], ack 3069, win 501, options [nop,nop,TS val 956973926 ecr 1398186172], length 0
+	^C
+	37 packets captured
+	37 packets received by filter
+	0 packets dropped by kernel
+	
+
+###################### Nginx: Configurazione bridge2 ######################
+- Creo un secondo Virtual Bridge (bridge2) a cui connetto nginx3 e nginx4 quindi disconnetto nginx4 dal default bridge:
+	> sudo docker network create --driver macvlan --subnet=192.168.0.0/24 --gateway=192.168.0.1 bridge2
+		7cfb34da93c225e6f0ff509a9b4afc8a3d22357f5802f98f605a89c162d3cf17
+	> sudo docker network ls
+		NETWORK ID     NAME      DRIVER    SCOPE
+		b74c59734d8d   bridge    bridge    local
+		7cfb34da93c2   bridge2   macvlan   local
+		d857b84abaea   host      host      local
+		6efa81b3d976   none      null      local	
+	> sudo docker network connect bridge2 nginx3 --ip 192.168.0.3
+	> sudo docker network connect bridge2 nginx4 --ip 192.168.0.4
+	> sudo docker exec nginx4 ifconfig eth0 down
+	
+	--> inizialmente nginx3 e nginx4 erano connessi al brigde1, ora invece nginx3 e nginx4 sono stati connessi anche
+	    al bridge2, inoltre in fine nginx4 e` stato disconnesso dal bridge1
+
+###################### Nginx: setup routing con bridge2 ######################
+- Sistemo le tabelle di routing dei container e verifico il routing:
+	> sudo docker exec nginx4 route add default gw 192.168.0.3
+	> sudo docker exec nginx2 route add -net 192.168.0.0/24 gw 172.17.0.3
+	
+- Verifiche da nginx2:
+	> sudo docker exec -it nginx2 ping 192.168.0.4
+		PING 192.168.0.4 (192.168.0.4) 56(84) bytes of data.
+		64 bytes from 192.168.0.4: icmp_seq=1 ttl=63 time=0.275 ms
+		64 bytes from 192.168.0.4: icmp_seq=2 ttl=63 time=0.088 ms
+		64 bytes from 192.168.0.4: icmp_seq=3 ttl=63 time=0.057 ms
+		64 bytes from 192.168.0.4: icmp_seq=4 ttl=63 time=0.058 ms
+		64 bytes from 192.168.0.4: icmp_seq=5 ttl=63 time=0.059 ms
+		64 bytes from 192.168.0.4: icmp_seq=6 ttl=63 time=0.057 ms
+		64 bytes from 192.168.0.4: icmp_seq=7 ttl=63 time=0.056 ms
+		64 bytes from 192.168.0.4: icmp_seq=8 ttl=63 time=0.058 ms
+		64 bytes from 192.168.0.4: icmp_seq=9 ttl=63 time=0.057 ms
+		64 bytes from 192.168.0.4: icmp_seq=10 ttl=63 time=0.087 ms
+		64 bytes from 192.168.0.4: icmp_seq=11 ttl=63 time=0.057 ms
+
+		--- 192.168.0.4 ping statistics ---
+		11 packets transmitted, 11 received, 0% packet loss, time 10226ms
+		rtt min/avg/max/mdev = 0.056/0.082/0.275/0.061 ms
+	
+	> sudo docker exec -it nginx2 traceroute 192.168.0.4
+		traceroute to 192.168.0.4 (192.168.0.4), 30 hops max, 60 byte packets
+		 1  172.17.0.3 (172.17.0.3)  0.185 ms  0.018 ms  0.033 ms
+		 2  192.168.0.4 (192.168.0.4)  0.128 ms  0.039 ms  0.070 ms
+		 
+	> sudo docker exec -it nginx2 nmap 192.168.0.4
+		Starting Nmap 7.80 ( https://nmap.org ) at 2022-12-07 18:19 UTC
+		Nmap scan report for 192.168.0.4
+		Host is up (0.000078s latency).
+		Not shown: 998 closed ports
+		PORT   STATE SERVICE
+		22/tcp open  ssh
+		80/tcp open  http
+
+		Nmap done: 1 IP address (1 host up) scanned in 13.13 seconds
+		
+	> sudo docker exec -it nginx2 nmap -A 192.168.0.4 -p 22,80
+		Starting Nmap 7.80 ( https://nmap.org ) at 2022-12-07 18:20 UTC
+		Nmap scan report for 192.168.0.4
+		Host is up (0.00014s latency).
+
+		PORT   STATE SERVICE VERSION
+		22/tcp open  ssh     OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)
+		80/tcp open  http    nginx 1.23.2
+		|_http-server-header: nginx/1.23.2
+		|_http-title: 403 Forbidden
+		Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+		Aggressive OS guesses: Linux 2.6.32 (96%), Linux 3.2 - 4.9 (96%), Linux 2.6.32 - 3.10 (96%), Linux 3.4 - 3.10 (95%), Synology DiskStation Manager 5.2-5644 (95%), Linux 3.1 (95%), Linux 3.2 (95%), AXIS 210A or 211 Network Camera (Linux 2.6.17) (94%), Linux 2.6.32 - 2.6.35 (94%), Linux 2.6.32 - 3.5 (94%)
+		No exact OS matches for host (test conditions non-ideal).
+		Network Distance: 2 hops
+		Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+		TRACEROUTE (using port 22/tcp)
+		HOP RTT     ADDRESS
+		1   0.03 ms 172.17.0.3
+		2   0.39 ms 192.168.0.4
+
+		OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+		Nmap done: 1 IP address (1 host up) scanned in 37.03 seconds
