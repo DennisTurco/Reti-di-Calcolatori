@@ -1,0 +1,211 @@
+Autore = Dennis Turco
+
+################################################ Autenticazione con certificato client ################################################
+
+	- entro nella bash di nginx2:
+	sudo docker exec -it nginx2 bash
+		> mkdir /etc/nginx/certificate
+		> cd /etc/nginx/certificate
+		- Sull'host nginx2 creo un certificato utente self-signed:
+		> openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365  -out user-certificate.crt -keyout user.key
+			Generating a RSA private key
+			.............................................................++++
+			.....................++++
+			writing new private key to 'user.key'
+			Enter PEM pass phrase:
+			Verifying - Enter PEM pass phrase:
+			-----
+			You are about to be asked to enter information that will be incorporated
+			into your certificate request.
+			What you are about to enter is what is called a Distinguished Name or a DN.
+			There are quite a few fields but you can leave some blank
+			For some fields there will be a default value,
+			If you enter '.', the field will be left blank.
+			-----
+			Country Name (2 letter code) [AU]:IT
+			State or Province Name (full name) [Some-State]:Parma
+			Locality Name (eg, city) []:Parma
+			Organization Name (eg, company) [Internet Widgits Pty Ltd]:unipr
+			Organizational Unit Name (eg, section) []:unipr
+			Common Name (e.g. server FQDN or YOUR name) []:198.168.0.4
+			Email Address []:dennis.turco@studenti.unipr.it
+			
+		- esco da nginx2
+		> exit
+		
+	- mi collego a nginx4:
+	> sudo docker exec -it nginx4 bash
+		- modifico il file di configurazione aggiungendo la stringa "ssl_verify_client optional_no_ca;" (richiesta opzionale del certificato client):
+			server {
+				listen 443 ssl default_server;
+				listen [::]:443 ssl default_server;
+				   ssl_protocols TLSv1.2 TLSv1.3;
+				ssl_certificate /etc/nginx/certificate/nginx-certificate.crt;
+				ssl_certificate_key /etc/nginx/certificate/nginx.key;
+				ssl_verify_client optional_no_ca;
+				root /usr/share/nginx/html/secure/;
+				index index.html index.htm index.nginx-debian.html;
+				server_name _;
+				location / {
+					try_files $uri $uri/ =404;
+				}
+			}
+		
+		- esco da nginx4
+		> exit
+	
+	
+	- riavvio nginx
+	> sudo service nginx restart
+	
+	- entro nella bash di nginx2:
+	> sudo  docker exec -it nginx2 bash
+		- entro nella directory del certificato:
+		> cd /etc/nginx/certificate
+		
+		- Mi connetto al server https utilizzando  openssl s_client  con l'autenticazione tramite il certificato utente.
+		> openssl s_client -connect 192.168.0.4:443 -cert user-certificate.crt -key user.key
+	
+			root@a36aaff803f3:/etc/nginx/certificate# openssl s_client -connect 192.168.0.4:443 -cert user-certificate.crt -key user.key
+			Enter pass phrase for user.key:
+			CONNECTED(00000003)
+			Can't use SSL_get_servername
+			depth=0 C = IT, ST = Parma, L = Parma, O = unipr, OU = unipr, CN = 192.168.0.4, emailAddress = dennis.turco@studenti.unipr.it
+			verify error:num=18:self signed certificate
+			verify return:1
+			depth=0 C = IT, ST = Parma, L = Parma, O = unipr, OU = unipr, CN = 192.168.0.4, emailAddress = dennis.turco@studenti.unipr.it
+			verify return:1
+			---
+			Certificate chain
+			 0 s:C = IT, ST = Parma, L = Parma, O = unipr, OU = unipr, CN = 192.168.0.4, emailAddress = dennis.turco@studenti.unipr.it
+			   i:C = IT, ST = Parma, L = Parma, O = unipr, OU = unipr, CN = 192.168.0.4, emailAddress = dennis.turco@studenti.unipr.it
+			---
+			Server certificate
+			-----BEGIN CERTIFICATE-----
+			MIIGBzCCA++gAwIBAgIUQaj2nJqxG08diHeDCvQI6OO00+owDQYJKoZIhvcNAQEL
+			BQAwgZIxCzAJBgNVBAYTAklUMQ4wDAYDVQQIDAVQYXJtYTEOMAwGA1UEBwwFUGFy
+			bWExDjAMBgNVBAoMBXVuaXByMQ4wDAYDVQQLDAV1bmlwcjEUMBIGA1UEAwwLMTky
+			LjE2OC4wLjQxLTArBgkqhkiG9w0BCQEWHmRlbm5pcy50dXJjb0BzdHVkZW50aS51
+			bmlwci5pdDAeFw0yMjEyMjUxODE5MTNaFw0yMzEyMjUxODE5MTNaMIGSMQswCQYD
+			VQQGEwJJVDEOMAwGA1UECAwFUGFybWExDjAMBgNVBAcMBVBhcm1hMQ4wDAYDVQQK
+			DAV1bmlwcjEOMAwGA1UECwwFdW5pcHIxFDASBgNVBAMMCzE5Mi4xNjguMC40MS0w
+			KwYJKoZIhvcNAQkBFh5kZW5uaXMudHVyY29Ac3R1ZGVudGkudW5pcHIuaXQwggIi
+			MA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQC8g6fWXxiPL6FJ+KCbqDuAtYJK
+			V//NeGgMpUEutVAO+THmMCkP3h9EH8iWpMTHwK/L/wz9oh0gBODBuiiNhxI8QkkR
+			coEYWlILGQQJIvCEWy0++HbwXSzOLyCjALPKWGJn9r23Em3nm7HfFamnAqUhS3tv
+			GvtESPqJ79pSw5rSRYkpcKpuRpzTXQXQHWBJz1xlIZC/HsIYKWZMoOah1fIh8kLp
+			skvlDXRbtk3iAz0XYMYJWBRHulhUX5CnNABNsNXTUs6F7iVdIwInOvlahbmQn3kx
+			AE7Np3mNkZJk1EvCp5GtpQw9KTftYRbp/xnImXFUiOrbjLJlPz+Jmoe/ImgIrwJa
+			5RUtW2GBUJtJce4ReRnh6aRCHM2G9GnVL2kxenktfGrefv4WiU9evdJd1UAC9w9X
+			5oLkJDJH7nhYSmDZrMC5Xo73/X2XctHC5qatNcPx99qSnxCkkhpeu7bCGPN4g8eV
+			3tDw4q45e1YUXiJQeMhA9PljFckY7c6Shoufh5WkJNFDBxfdM4pNZ3t7i0X4dEZk
+			wf1Rvk/e1hrb394czzzXgpOzGk5o0YAj/s9HccawWiEoQ+iQYA+ttGdj2rJjUZU+
+			0OtVmsuT6oQ/odkgkhXMfvSsUynEdHdZKmkSX26h/lMgVHvYNVFt8a3fsEI6nxEx
+			3T/+KTD1PuHBduV+ZQIDAQABo1MwUTAdBgNVHQ4EFgQUqjQS0n91kcMYpLl8cQkq
+			nYffo8UwHwYDVR0jBBgwFoAUqjQS0n91kcMYpLl8cQkqnYffo8UwDwYDVR0TAQH/
+			BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAgEAa9XHVhp2qKuOeN2VQaduqZqRIuKa
+			kj0WAqbM0VMcfk4bPqwMRGDV7P9qCUSXdjk1KE38BIvL6Pcqj2jcMqqjki2c0Cu8
+			WM4DgxCKutRuvlB6waQSPYIPy1PThrvg6wWtM7+XY89rOeoKbP0PcUrh+u91XDwI
+			XLGU6PqoecgIy447F69ivMVo6xB/bGZ6/S3UN1OPiv8ch9pUtbT8K7xZM4PLmxEd
+			aTF8S1J6BMQeCNOC2+pEqZUzC9UGX7/kwDnxyA/vPufzCcUJYiWrE8bgDYCSjqxB
+			wC7MzNuaP6ln/jvkBIZ45i3hTq1qhP0RfI8PxXKrPRIDqUoBxvA6SN6ZSZw0+nst
+			dxCodMhUTKv+5q6CmEWLKrOQIy0OKb/jTh1I+IU3q8JLWHFj+fGpqk+YL1V9N6/f
+			eIGnqSTuRFHwfUJyKoU35h3oUvWAdhnb+5kS9y5bsgBjl5iYn2hawpzVQPbYjTgM
+			f4niWp6BxA5Ws/Als4vxRx0kwSyJLDHoK+HDkJDgmOdHKh/7T1/HyRZSYQxLfPKm
+			8rKZdIrwKFVIrvosuGdYyTaU8asanZT8Dsgj65NFWFbw6HAjOZagIWGUyCYx3xeZ
+			K2KPtQqwaOBz0cGyVHektThCwO7c2jdAHf9icgjzudslfF73CJ252ITRjiOV3yYs
+			bQa1ZDqDSB6V5BM=
+			-----END CERTIFICATE-----
+			subject=C = IT, ST = Parma, L = Parma, O = unipr, OU = unipr, CN = 192.168.0.4, emailAddress = dennis.turco@studenti.unipr.it
+
+			issuer=C = IT, ST = Parma, L = Parma, O = unipr, OU = unipr, CN = 192.168.0.4, emailAddress = dennis.turco@studenti.unipr.it
+
+			---
+			No client certificate CA names sent
+			Peer signing digest: SHA256
+			Peer signature type: RSA-PSS
+			Server Temp Key: X25519, 253 bits
+			---
+			SSL handshake has read 2359 bytes and written 363 bytes
+			Verification error: self signed certificate
+			---
+			New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+			Server public key is 4096 bit
+			Secure Renegotiation IS NOT supported
+			Compression: NONE
+			Expansion: NONE
+			No ALPN negotiated
+			Early data was not sent
+			Verify return code: 18 (self signed certificate)
+			---
+			---
+			Post-Handshake New Session Ticket arrived:
+			SSL-Session:
+			    Protocol  : TLSv1.3
+			    Cipher    : TLS_AES_256_GCM_SHA384
+			    Session-ID: 583CC026A458DE786307BA10ED04704BCF3A6B50E7AF33A56C6D6BFEDD019D9D
+			    Session-ID-ctx: 
+			    Resumption PSK: 907C76EEFCBF21C2C661430293DDA1AD1FCAC07E6BE76FFBE547F4220D3735C021C5E24ED11F7293E062FD21E31FD13C
+			    PSK identity: None
+			    PSK identity hint: None
+			    SRP username: None
+			    TLS session ticket lifetime hint: 300 (seconds)
+			    TLS session ticket:
+			    0000 - 8d e9 34 91 7d 1d 3c de-e6 d5 49 98 11 4a 12 9d   ..4.}.<...I..J..
+			    0010 - d2 11 86 72 ee 7c 46 6e-ce 9e 3d 90 dd d5 b2 a9   ...r.|Fn..=.....
+			    0020 - 62 c9 88 69 8c c1 3e 39-d5 14 1e b5 f0 82 39 2d   b..i..>9......9-
+			    0030 - 96 22 65 37 44 33 14 96-af 61 07 23 40 30 a5 5a   ."e7D3...a.#@0.Z
+			    0040 - 31 44 93 09 6a 60 1a 7c-4b 61 a6 22 30 c8 2c e6   1D..j`.|Ka."0.,.
+			    0050 - 49 40 f6 cb 76 2f 97 db-9a a6 bb ed a0 fb f5 90   I@..v/..........
+			    0060 - 4c a8 c4 b6 78 31 85 59-27 12 47 35 dd 58 73 a1   L...x1.Y'.G5.Xs.
+			    0070 - ff 94 c5 97 09 e3 f8 24-60 d4 a6 0f b3 26 0d 85   .......$`....&..
+			    0080 - 48 05 52 3c 2a e3 d3 55-3d ce 86 5f d1 37 87 0d   H.R<*..U=.._.7..
+			    0090 - 6d 71 04 d3 b1 67 73 08-80 79 97 33 b5 58 32 ac   mq...gs..y.3.X2.
+			    00a0 - 60 6b 17 72 ff 49 8b c0-29 44 bc 8e 93 d2 cb c2   `k.r.I..)D......
+			    00b0 - f8 d0 3c f5 cb 1a 9f 15-b8 9c 8c 8c 25 b7 a0 2d   ..<.........%..-
+			    00c0 - b3 a8 7a 5a 71 d4 93 19-80 b0 70 19 b6 41 e3 e4   ..zZq.....p..A..
+			    00d0 - 46 af 6e ec ac f7 3a 6d-39 68 87 f4 cf 2a 17 e7   F.n...:m9h...*..
+
+			    Start Time: 1671995583
+			    Timeout   : 7200 (sec)
+			    Verify return code: 18 (self signed certificate)
+			    Extended master secret: no
+			    Max Early Data: 0
+			---
+			read R BLOCK
+			---
+			Post-Handshake New Session Ticket arrived:
+			SSL-Session:
+			    Protocol  : TLSv1.3
+			    Cipher    : TLS_AES_256_GCM_SHA384
+			    Session-ID: 151144AB9A25F3542DEA3F72D6221A23D54DB649F385D50DBD1290A989F783AF
+			    Session-ID-ctx: 
+			    Resumption PSK: 70F3831F0C4246AA77F65929A6F9209F016560A30B042070D8C7D86BC705B1C0523645106D8722AE8C1D9BAD576391AA
+			    PSK identity: None
+			    PSK identity hint: None
+			    SRP username: None
+			    TLS session ticket lifetime hint: 300 (seconds)
+			    TLS session ticket:
+			    0000 - 8d e9 34 91 7d 1d 3c de-e6 d5 49 98 11 4a 12 9d   ..4.}.<...I..J..
+			    0010 - f0 e0 a1 07 45 fb 92 68-1d f7 36 74 63 4a 7c ee   ....E..h..6tcJ|.
+			    0020 - 1a 8c 27 cd 98 4a cc fa-4c 67 9c dd f2 86 b0 17   ..'..J..Lg......
+			    0030 - 0c 16 5c 48 7a 06 21 6b-1a 89 c5 11 72 d1 32 ce   ..\Hz.!k....r.2.
+			    0040 - f1 53 a3 c3 a2 1e c4 3c-a1 a1 50 74 71 2b 10 d4   .S.....<..Ptq+..
+			    0050 - 7b 0c 69 c0 69 be 35 70-26 09 a8 40 2d 6d d2 c6   {.i.i.5p&..@-m..
+			    0060 - ce fd ab a3 a7 a2 22 99-1b b1 71 69 94 f3 87 ef   ......"...qi....
+			    0070 - 9b fe ab fe 58 7c bf a9-4b f8 fd 37 73 25 53 be   ....X|..K..7s%S.
+			    0080 - 3b 3c 19 aa 1f 96 6a 0f-bf a3 41 29 8d 6d 9b 73   ;<....j...A).m.s
+			    0090 - 12 69 4b a7 2e 9f 30 84-da f9 96 d0 cf e5 08 d9   .iK...0.........
+			    00a0 - 1f 8f c6 6f 81 95 5f ca-dc 2e 83 f6 ba 1e 09 eb   ...o.._.........
+			    00b0 - 0b 6c a9 d3 29 19 70 1f-e9 3d e1 d8 59 1a 50 87   .l..).p..=..Y.P.
+			    00c0 - 0e b0 aa 29 b1 a2 5d 60-2b 3f ab c5 60 68 b7 41   ...)..]`+?..`h.A
+			    00d0 - e6 33 3b fa 32 79 6d 20-45 17 17 7a 98 ca 06 13   .3;.2ym E..z....
+
+			    Start Time: 1671995583
+			    Timeout   : 7200 (sec)
+			    Verify return code: 18 (self signed certificate)
+			    Extended master secret: no
+			    Max Early Data: 0
+			---
+			read R BLOCK
+		
