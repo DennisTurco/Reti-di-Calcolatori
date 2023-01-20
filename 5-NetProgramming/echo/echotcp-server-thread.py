@@ -8,12 +8,12 @@ import optparse
 
 
 def ascolto(s,addr):
-        print ("connection from the client  ", addr, file = sys.stderr)
+        print ("connection from the client: ", addr, file = sys.stderr)
         data = s.recv(1500).decode()
-        print ('received ',data, file = sys.stderr)
+        print ('received: ',data, file = sys.stderr)
         answer = data
         s.send(answer.encode())
-        print ('sent ' , answer, file = sys.stderr)
+        print ('sent: ' , answer, file = sys.stderr)
 
 
 if __name__ == "__main__":
@@ -28,7 +28,7 @@ if __name__ == "__main__":
         # Bind the socket to the port
         # server_address = (nomeserver, port)
 
-        print('starting up on port ',addr, file = sys.stderr)
+        print('starting up on port: ',addr, file = sys.stderr)
         sock.bind(addr)
         
         # Listen for incoming connections

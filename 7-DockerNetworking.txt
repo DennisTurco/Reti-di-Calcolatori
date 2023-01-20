@@ -1,7 +1,25 @@
 Autore = Dennis Turco
 
+
+docker run - Run a command in a new container
+-d, --detach                    Run container in background and print container ID
+--name string                   Assign a name to the container
+
+docker-exec - Run a command in a running container
+-i, --interactive[=false]       Keep STDIN open even if not attached
+-t, --tty[=false]      		Allocate a pseudo-TTY
+
+
+iptables/ip6tables — administration tool for IPv4/IPv6 packet filtering and NAT
+traceroute - print the route packets trace to network host
+tcpdump - dump traffic on a network
+nmap - Network exploration tool and security / port scanner
+
+openssl-passwd, passwd - compute password hashes
+-1  Use the MD5 based BSD password algorithm 1.
+
 ###################### Nginx: immagine nginx-net ######################
-- scarico l' immagine con il comando: sudo docker run -d --name nginx2 nginx
+- scarico l'immagine con il comando: sudo docker run -d --name nginx2 nginx
  	output:
 		Unable to find image 'nginx:latest' locally
 		latest: Pulling from library/nginx
@@ -15,7 +33,7 @@ Autore = Dennis Turco
 		Status: Downloaded newer image for nginx:latest
 		c53ed333e26230e6d859b64aae8ad48f3a94ca3aa5ea49a939571e02f05592ac
 
-- entro nell' immagine con il comando: sudo docker exec -it nginx2 bash
+- entro nell'immagine con il comando: sudo docker exec -it nginx2 bash
 	a questo punto eseguo alcuni comandi come da richiesta:
 		1. apt-get update -y
 		2. apt-get install -y net-tools iptables iproute2 nmap traceroute dnsutils iputils-ping
@@ -30,6 +48,10 @@ Autore = Dennis Turco
 - siccome non mi serve piu`, posso terminare nginx2 e rimuovere il container:
         1. sudo docker stop nginx2
         2. sudo docker rm nginx2
+
+
+ssh — OpenSSH remote login client
+
 
 ###################### Nginx: creazione dei container ######################
 - creo la cartella che diventera` la root dei server nginx: sudo mkdir -p /home/ubuntu/NGINX
@@ -221,6 +243,11 @@ nginx3> sudo docker exec -it nginx3 tcpdump port 22 --> (dump traffic on a netwo
 	
 	--> inizialmente nginx3 e nginx4 erano connessi al brigde1, ora invece nginx3 e nginx4 sono stati connessi anche
 	    al bridge2, inoltre in fine nginx4 e` stato disconnesso dal bridge1
+
+
+
+traceroute - print the route packets trace to network host
+
 
 ###################### Nginx: setup routing con bridge2 ######################
 - Sistemo le tabelle di routing dei container e verifico il routing:

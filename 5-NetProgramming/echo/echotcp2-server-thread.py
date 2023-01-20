@@ -7,17 +7,17 @@ import sys
 import optparse
 
 def ascolto(s,addr):
-        print ("connection from the client  ", addr, file = sys.stderr)
+        print ("connection from the client: ", addr, file = sys.stderr)
         # Receive the data in small chunks and retransmit it
         while True:
                 data = s.recv(1500).decode()
-                print ("message received ", data, file = sys.stderr)
+                print ("message received: ", data, file = sys.stderr)
                 if data:
                       answer=data
                       s.send(answer.encode())
-                      print ("message sent  ", data, file = sys.stderr)
+                      print ("message sent: ", data, file = sys.stderr)
                 else:
-                      print ("closed connection from ", addr , file = sys.stderr)
+                      print ("closed connection from: ", addr , file = sys.stderr)
                       break
 
 if __name__ == "__main__":
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         addr = (options.server,options.port)
         sock = socket(AF_INET,SOCK_STREAM)
         # Bind the socket to the port
-        print ('server bind on port ',addr, file = sys.stderr)
+        print ('server bind on port: ',addr, file = sys.stderr)
         sock.bind(addr)
         print ('waiting for a connection ', file = sys.stderr)
         sock.listen(1)

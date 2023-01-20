@@ -6,6 +6,13 @@ inizialmente ho installato alcuni pachetti:
 	- sudo apt update
 	- sudo apt install nginx
 
+
+netstat  -  Print network connections, routing tables, interface statistics, masquerade con‐
+       nections, and multicast memberships
+
+nginx — HTTP and reverse proxy server, mail proxy server
+
+
 successivamente ho verificato la corretta installazione:
 	dennis@dennis-VirtualBox:~/Desktop$ service nginx start
 	dennis@dennis-VirtualBox:~/Desktop$ netstat -taupn
@@ -18,6 +25,8 @@ successivamente ho verificato la corretta installazione:
 		tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      -                   
 		...
 		...               
+
+curl simile a wget
 
 	dennis@dennis-VirtualBox:~/Desktop$ curl http://localhost
 		<!DOCTYPE html>
@@ -49,12 +58,21 @@ successivamente ho verificato la corretta installazione:
 
 ############################## SCRIPT CGI ####################################
 
+
+fcgiwrap - is a simple server for running CGI applications over FastCGI. It hopes to provide clean CGI support to Nginx
+cp - copy files and directories
+
+
 - Intallazione e Configurazione:
 	1. inizialmente ho installato fcgiwrap con: sudo apt install fcgiwrap
 	2. sudo cp /usr/share/doc/fcgiwrap/examples/nginx.conf /etc/nginx/fcgiwrap.conf
 	3. sudo mkdir /usr/lib/cgi-bin -p
 	4. nel file "/etc/nginx/sites-available/default" ho aggiunto la riga:
 		include fcgiwrap.conf;
+
+
+chmod 755 (RWX/RW/RW)Con questa autorizzazione il proprietario del file può leggere, scrivere ed eseguire nel file mentre gli altri leggono e scrivono nel file ma non eseguono.
+
 
 - Esecuzione Script:
 	1. mi sposto nella directory: cd /usr/lib/cgi-bin

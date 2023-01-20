@@ -77,12 +77,116 @@ Autore: Dennis Turco
         - echo_client.py
         - echo_server.py
 
+    Innanzitutto, nelle impostazioni della macchina virtuale ho aggiunto una regola di "Port Fowarding" e ho inserito:
+        - Name = udp;
+        - Protocol = UDP;
+        - HOST IP = ;
+        - HOST Port = 10102;
+        - GUEST IP = ;
+        - GUEST Port = 10102;
 
+    Successivamente ho aperto 2 terminali: 
+        1. nella virtual machine (che fungerà da server)
+        2. su windows (che fungerà da client)
 
+    
+    1. PUNTO DGRAM: Questo programma esegue una comunicazione senza riscontro.
+        Terminale macchina virtuale (server): 
+            input: python dgram_server.py
+            output: 
+                    port: 10102  server:0.0.0.0 bufsize: 1024
+                addr: ('10.0.2.2', 62269)  data: b'hello from Dennis Turco, in python'
+
+        Terminale macchina client: 
+            input: python dgram_client.py -s 160.78.143.10 -p 10102  (dove 160.78.143.10 indirizzo ipv4 della macchina client connessa alla VPN dell'università ottenuta con: hostname -I)
+            output: 
+                OPTIONS  server: 160.78.143.10  - port: 10102  - bufsize: 100
+                sent  34  Bytes
+
+                time : 0.0005247592926025391
+    
+    2. PUNTO ECHO: Questo programma esegue una comunicazione con riscontro sullo stesso socket.
+        Terminale macchina virtuale (server): 
+            input: python echo_server.py
+            output: 
+                    port: 10102  server:0.0.0.0 bufsize: 1024
+                from: ('10.0.2.2', 55701)  data: b'hello from Dennis Turco, in python'
+                to: ('10.0.2.2', 55701)  data: b'hello from Dennis Turco, in python'
+                ---------------------------
+
+        Terminale macchina client: 
+            input: python dgram_client.py -s 160.78.143.10 -p 10102  (dove 160.78.143.10 indirizzo ipv4 della macchina client connessa alla VPN dell'università ottenuta con: hostname -I)
+            output: 
+                OPTIONS  server: 160.78.143.10 - port: 10102  - message: b'hello from Dennis Turco, in python'
+                to:  ('160.78.143.10', 10102) - data:  b'hello from Dennis Turco, in python'
+                from: ('160.78.143.10', 10102) - data: b'hello from Dennis Turco, in python'
+                tempo : 0.0013637542724609375
+
+PERCHÈ C'È SCRITTO: python dgram_client.py ...... ??????????????????
 
 =========================================================| PROGRAMMAZIONE TCP |=========================================================
     Ho scaricato e modificato come richiesto i file:
         - echotcp-client.py
         - echotcp-server-thread.py
         - echotcp2-client.py
-        - echotcp2-server-thread.py
+        - echotcp2_server-thread.py
+
+    Innanzitutto, nelle impostazioni della macchina virtuale ho aggiunto una regola di "Port Fowarding" e ho inserito:
+        - Name = echo;
+        - Protocol = TCP;
+        - HOST IP = ;
+        - HOST Port = 10102;
+        - GUEST IP = ;
+        - GUEST Port = 10102;
+    
+    come prima ho aperto 2 terminali: 
+        1. nella virtual machine (che fungerà da server)
+        2. su windows (che fungerà da client)
+
+ 
+    1. PUNTO ECHOTCP: Questo programma esegue una comunicazione con riscontro su un socket diverso.
+         Terminale macchina virtuale (server): 
+            input: python echotcp-server-thread.py
+            output: 
+                OPTIONS  server: 0.0.0.0  - port: 10102
+                starting up on port: ('0.0.0.0', 10102)
+                waiting for a connection
+                connection from the client: ('10.0.2.2', 51240)
+                received: hello
+                sent: hello
+
+        Terminale macchina client: 
+            input:  python echotcp-client.py    oppure
+                    python echotcp-client.py -s 160.78.143.10 -p 10102
+            output: 
+                OPTIONS  server: localhost  - port: 10102  - message: b'hello from Turco, in python'
+                Connected to server: ('localhost', 10102)
+                Send message: hello
+                Server response: hello
+
+    
+    2. PUNTO ECHOTCP2: Questo programma esegue una comunicazione persistente con riscontri su diversi socket.
+        Terminale macchina virtuale (server): 
+            input: python echotcp2-server-thread.py
+            output: 
+                OPTIONS  server: 0.0.0.0  - port: 10102
+                server bind on port: ('0.0.0.0', 10102)
+                waiting for a connection
+                connection from the client: ('10.0.2.2'. 51429)
+                message received: prova messaggio da client 
+                message sent: prova messaggio da client
+                message received: ciao server
+                message sent: ciao server
+                closed connection from: ('10.0.2.2', 51457)
+
+        Terminale macchina client: 
+            input:  python echotcp2-client.py    oppure
+                    python echotcp2-client.py -s 160.78.143.10 -p 10102
+            output: 
+                OPTIONS  server: localhost  - port: 10102  - message: hello from Dennis Turco, in python
+                Connected to server: ('localhost', 10102)
+                message (q to quit) > prova messaggio da client
+                Server response:  prova messaggio da client
+                message (q to quit) > ciao server
+                Server response:  ciao server
+                message (q to quit) > q

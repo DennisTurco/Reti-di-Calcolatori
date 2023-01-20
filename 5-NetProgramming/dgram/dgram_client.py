@@ -23,8 +23,8 @@ s = socket(AF_INET, SOCK_DGRAM)
 
 ta = time.time()
 
-Len = s.sendto(f"hello from {name} {surname}, in python",addr) 
-# Len = s.sendto("hello".encode('utf-8'), addr) 
+Len = s.sendto(f"hello from {name} {surname}, in python".encode('utf-8'), addr) 
+#Len = s.sendto("hello".encode('utf-8'), addr) 
 
 print ("sent ", Len, " Bytes \n")
 
@@ -32,4 +32,3 @@ tb = time.time()
 print ("time :", tb-ta)
 
 s.close()
-

@@ -15,10 +15,26 @@ Autore = Dennis Turco
     
     
 #################################### firewall: protezione dell’host ####################################
+
+
+The INPUT chain is used for any packet coming into the system. The OUTPUT chain is for any packet leaving the system. And the FORWARD chain is for packets that are forwarded (routed) through the system.
+-p --> protocol  The protocol of the rule or of the packet to check.
+--protocol  -p proto        protocol: by number or name, eg. `tcp'
+--icmp-type {type[/code]|typename}
+           This allows specification of the ICMP type, which can be a numeric ICMP type, type/code  pair,  or
+           one of the ICMP type names shown by the command
+-j, --jump target
+       This  specifies the target of the rule;
+--source-port,--sport port[:port]
+       Source  port  or  port range specification. This can either be a service name or a port number. An
+       inclusive range can also be specified, using the format first:last.
+
+
+
 - Protezione dell’host nginx2: tutte le connessioni entranti sono bloccate tranne ssh e http.
 	
 	- entro in ngnix2
-	> sudo docker exec -it nginx2 bash	
+	> sudo docker exec -it nginx2 bash
 		
 		- visualizzare le regole
 		> iptables-legacy -nvL
@@ -45,14 +61,14 @@ Autore = Dennis Turco
 		> iptables-legacy --policy INPUT DROP
 		
 		- per visualizzare le regole/policy mostrando il numero di riga di ogni regola:
-		> iptables-legacy -nvL --line-numbers 
+		> iptables-legacy -nvL --line-numbers
 		
 		- elimina la 4^ riga:
 		> iptables-legacy -D INPUT 4
 		
-		- Salvataggio della cofigurazione su file e riipristino:
+		- Salvataggio della cofigurazione su file e ripristino:
 		> iptables-legacy-save > /etc/iptables.conf
-		> iptables-legacy -F		--> elimina tutte le regole
+		> iptables-legacy -F	--> elimina tutte le regole
 		> iptables-legacy-restore < /etc/iptables.conf
 		
 	- visualizzare file iptables.conf
@@ -70,7 +86,11 @@ Autore = Dennis Turco
 	
 	> exit
 		 
-		 
+
+ -s, --source address[/mask][,...]
+       Source specification.
+-m ????????
+	 
 		 
 #################################### firewall: protezione della LAN ####################################
 Protezione della rete 192.168.0.0/24. Setup firewall su nginx3

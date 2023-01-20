@@ -1,0 +1,107 @@
+Autore: Dennis Turco
+
+INTRODUZIONE
+- inizialmente ho installato "tshark" tramite "sudo apt install tshark";
+- ho creato il file "4-sniffer.pcap" tramite "touch 4-sniffer.pcap";
+- ho ricercato il nome del mio device di rete con "ip address", nel mio caso: enp0s3;
+- siccome ho problemi di permessi, ho usato il comando chmod 777 4-sniffer.pcap; 
+
+
+tshark è un analizzatore di traffico, serve per analizzare il traffico di rete.
+flag -i serve per inserire nome rete o indice dell'interfaccia su cui operare;
+flag -w serve per scrivere su un file di output
+
+COMANDO PER LA CATTURA: sudo tshark -i enp0s3 -w 4-sniffer.pcap  port 80
+OUTPUT:
+Running as user "root" and group "root". This could be dangerous.
+Capturing on 'enp0s3'
+ ** (tshark:4655) 21:15:16.102046 [Main MESSAGE] -- Capture started.
+ ** (tshark:4655) 21:15:16.102451 [Main MESSAGE] -- File: "4-sniffer.pcap"
+25 ^C
+
+FLUSSO CATTURATO:
+GET /~dennis.turco@studenti.unipr.it/RETI2223/2-VirtualLinux.txt HTTP/1.1
+Host: didattica-linux.unipr.it
+User-Agent: Wget/1.21.2
+Accept: */*
+Accept-Encoding: identity
+Connection: Keep-Alive
+
+
+HTTP/1.1 200 OK
+Date: Wed, 26 Oct 2022 06:28:27 GMT
+Server: Apache/2.4.29 (Ubuntu)
+Last-Modified: Tue, 11 Oct 2022 14:54:59 GMT
+ETag: "a68-5eac375cc0f21"
+Accept-Ranges: bytes
+Content-Length: 2664
+Vary: Accept-Encoding
+Keep-Alive: timeout=5, max=100
+Connection: Keep-Alive
+Content-Type: text/plain
+
+Autore: Dennis Turco
+
+PUNTO 1:    Seguendo i link guida presenti su elly 2022 ho installato Ubuntu e VirtualBox, 
+            successivamente ho creato una macchina virtuale ed ho inserito al suo interno Ubuntu 20.04.
+            Ho installato anche Ubuntu-20.04 tramite PowerShell di Windows tramite il comando: wsl --install -d Ubuntu-20.04
+
+PUNTO 2:    Ho installato tutti i pacchetti per la rete elencati su elly 2022, incluso SSH.
+            comandi:
+                sudo apt install traceroute
+                sudo apt install whois
+                sudo apt install nmap
+                sudo apt install wget
+                sudo apt install curl
+                sudo apt install tcpdump
+                sudo apt install wireshark
+                sudo apt install tshark
+                sudo apt install net-tools 
+            le seguenti installazioni sono avvenute tutte con successo (alcune erano gia' installate)'.
+
+PUNTO 3:    Ho installato Docker seguendo i link di elly 2022;
+            comandi effettuati:
+                sudo apt-get update
+                sudo apt-get install \
+                    ca-certificates \
+                    curl \
+                    gnupg \
+                    lsb-release
+                sudo mkdir -p /etc/apt/keyrings
+                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+                echo \
+                    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+                    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+                sudo apt-get update
+                sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+                sudo service docker start
+                sudo docker run hello-world
+
+            Come richiesta da consegna ho fatto il pull dell'immagine Alpine Linux:
+            (eseguo tutti i comandi con privilegio "sudo")
+            comandi effettuati:
+                sudo docker pull alpine
+                sudo docker run alpine
+                sudo docker ps -a       #per verificare che tutto e' andato a buon fine
+
+                output: 
+                    CONTAINER ID   IMAGE         COMMAND     CREATED              STATUS                          PORTS     NAMES
+                    91c1122a84ec   alpine        "/bin/sh"   29 minutes ago       Exited (0) About a minute ago             relaxed_roentgen
+                    869994b6d398   hello-world   "/hello"    35 minutes ago       Exited (0) 4 minutes ago                  busy_taussing
+                    
+
+wget serve per eseguire il download di un documento          
+          
+COMANDO: wget http://didattica-linux.unipr.it/~dennis.turco@studenti.unipr.it/RETI2223/2-VirtualLinux.txt
+OUTPUT:  
+tudenti.unipr.it/RETI2223/2-VirtualLinux.txt
+--2022-10-25 21:15:33--  http://didattica-linux.unipr.it/~dennis.turco@studenti.unipr.it/RETI2223/2-VirtualLinux.txt
+Resolving didattica-linux.unipr.it (didattica-linux.unipr.it)... 160.78.50.165
+Connecting to didattica-linux.unipr.it (didattica-linux.unipr.it)|160.78.50.165|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 2664 (2,6K) [text/plain]
+Saving to: ‘2-VirtualLinux.txt.1’
+
+2-VirtualLinux.txt. 100%[===================>]   2,60K  --.-KB/s    in 0s      
+
+2022-10-25 21:15:33 (408 MB/s) - ‘2-VirtualLinux.txt.1’ saved [2664/2664]

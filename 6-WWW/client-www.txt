@@ -31,5 +31,35 @@ Autore = Dennis Turco
 
     avviare il programma con: python3 test.py
 
-    Esso eseguirà (se l'operazione avrà successo) la "GET" del contenuto della dyrectory
+    Esso eseguirà (se l'operazione avrà successo) la "GET" del contenuto della directory
     "/var/www/html"
+
+
+
+
+
+OUTPUT NON MIO
+
+----> Provo il programma
+
+chiara@chiara-VirtualBox:~/RETI$ python3 prova.py
+Connesso al server:  ('localhost', 80)
+Invio messaggio:
+ Prova client
+Risposta del server:
+ HTTP/1.1 400 Bad Request
+Server: nginx/1.18.0 (Ubuntu)
+Date: Wed, 23 Nov 2022 09:42:53 GMT
+Content-Type: text/html
+Content-Length: 166
+Connection: close
+
+<html>
+<head><title>400 Bad Request</title></head>
+<body>
+<center><h1>400 Bad Request</h1></center>
+<hr><center>nginx/1.18.0 (Ubuntu)</center>
+</body>
+</html>
+
+--> nginx ha risposto con la pagina di Bad Request

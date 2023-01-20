@@ -1,0 +1,218 @@
+Autore: Dennis Turco
+
+1.	Generazione delle chiavi RSA "turco_rsa_pub.pem" e "turco_rsa_key.pem" con 2048 bit 
+	
+	- Genere la chiave RSA "turco_rsa_key.pem" con 2048 bit.
+	  (come pass phrase (chiave simmetrica) ho inserito il mio cognome scritto in minuscolo). 	
+		> openssl genrsa -des3 -out turco_rsa_key.pem 2048
+			Generating RSA private key, 2048 bit long modulus (2 primes)
+			..............................+++++
+			.........+++++
+			e is 65537 (0x010001)
+			Enter pass phrase for turco_rsa_key.pem:
+			Verifying - Enter pass phrase for turco_rsa_key.pem:
+	
+	- Genere la chiave RSA "turco_rsa_pub.pem" con 2048 bit.
+	  (come pass phrase (chiave simmetrica) ho inserito il mio cognome scritto in minuscolo). 
+	- Il comando rsa elabora la chiave RSA, restituendo come uotput in questo caso la chiave pubblica "turco_rsa_pub.pem".
+		> openssl rsa -in turco_rsa_key.pem -pubout -out turco_rsa_pub.pem
+			Enter pass phrase for turco_rsa_key.pem:
+			writing RSA key
+
+
+2. Creazione messaggio da cifrare
+
+	- Salvo i percorsi dei file contenuti nella directory "html/RETI2223" in "toencrypt.txt"
+		> du -a ~/html/RETI2223/ > toencrypt.txt
+
+	- Stampo il contenuto del file:
+		> cat toencrypt.txt
+			4       /home/d.turco1/html/RETI2223/2-VirtualLinux.txt
+			8       /home/d.turco1/html/RETI2223/3-NetTools.txt
+			8       /home/d.turco1/html/RETI2223/4-NetSniffing.txt
+			8       /home/d.turco1/html/RETI2223/4-NetSniffing.pcap
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/gethost/gethostbyname_versione_estesa.py
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/gethost/gethostbyname.py
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/gethost/gethostbyaddr_versione_estesa.py
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/gethost/gethostbyaddr.py
+			16      /home/d.turco1/html/RETI2223/5-NetProgramming/gethost
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/echo/echotcp2-server-thread.py
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/echo/echotcp2-client.py
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/echo/echotcp-server-thread.py
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/echo/echotcp-client.py
+			16      /home/d.turco1/html/RETI2223/5-NetProgramming/echo
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/dgram/echo_server.py
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/dgram/echo_client.py
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/dgram/dgram_server.py
+			4       /home/d.turco1/html/RETI2223/5-NetProgramming/dgram/dgram_client.py
+			16      /home/d.turco1/html/RETI2223/5-NetProgramming/dgram
+			12      /home/d.turco1/html/RETI2223/5-NetProgramming/5-NetProgramming.txt
+			60      /home/d.turco1/html/RETI2223/5-NetProgramming
+			8       /home/d.turco1/html/RETI2223/6-WWW/nginx-cgi.txt
+			4       /home/d.turco1/html/RETI2223/6-WWW/nginx-PHP.txt
+			4       /home/d.turco1/html/RETI2223/6-WWW/nginx-reverse_proxy.txt
+			4       /home/d.turco1/html/RETI2223/6-WWW/nginx-virtual_host.txt
+			4       /home/d.turco1/html/RETI2223/6-WWW/test.py
+			4       /home/d.turco1/html/RETI2223/6-WWW/client-www.txt
+			4       /home/d.turco1/html/RETI2223/6-WWW/nginx-autenticazione.txt
+			32      /home/d.turco1/html/RETI2223/6-WWW
+			20      /home/d.turco1/html/RETI2223/7-DockerNetworking.txt
+			8       /home/d.turco1/html/RETI2223/8-DockerFirewall.txt
+			4       /home/d.turco1/html/RETI2223/9-openSSL/turco_rsa_key.pem
+			4       /home/d.turco1/html/RETI2223/9-openSSL/turco_rsa_pub.pem
+			4       /home/d.turco1/html/RETI2223/9-openSSL/toencrypt.txt
+			12      /home/d.turco1/html/RETI2223/9-openSSL
+			160     /home/d.turco1/html/RETI2223/
+
+3. Creo i file: "toencrypt.b64", "toencrypt.aes256", "toencrypt.sha1", "toencrypt.hmac", 
+"toencrypt.rsa_sign", "toencrypt.rsa_crypt":
+
+	- converto il contenuto del file "toencrypt.txt" come contenuto base64 in "toencrypt.b64"
+		> openssl base64 -e -in toencrypt.txt -out toencrypt.b64
+		> cat toencrypt.b64
+			NAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEkyMjIzLzItVmlydHVhbExpbnV4LnR4
+			dAo4CS9ob21lL2QudHVyY28xL2h0bWwvUkVUSTIyMjMvMy1OZXRUb29scy50eHQK
+			OAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEkyMjIzLzQtTmV0U25pZmZpbmcudHh0
+			CjgJL2hvbWUvZC50dXJjbzEvaHRtbC9SRVRJMjIyMy80LU5ldFNuaWZmaW5nLnBj
+			YXAKNAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEkyMjIzLzUtTmV0UHJvZ3JhbW1p
+			bmcvZ2V0aG9zdC9nZXRob3N0YnluYW1lX3ZlcnNpb25lX2VzdGVzYS5weQo0CS9o
+			b21lL2QudHVyY28xL2h0bWwvUkVUSTIyMjMvNS1OZXRQcm9ncmFtbWluZy9nZXRo
+			b3N0L2dldGhvc3RieW5hbWUucHkKNAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEky
+			MjIzLzUtTmV0UHJvZ3JhbW1pbmcvZ2V0aG9zdC9nZXRob3N0YnlhZGRyX3ZlcnNp
+			b25lX2VzdGVzYS5weQo0CS9ob21lL2QudHVyY28xL2h0bWwvUkVUSTIyMjMvNS1O
+			ZXRQcm9ncmFtbWluZy9nZXRob3N0L2dldGhvc3RieWFkZHIucHkKMTYJL2hvbWUv
+			ZC50dXJjbzEvaHRtbC9SRVRJMjIyMy81LU5ldFByb2dyYW1taW5nL2dldGhvc3QK
+			NAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEkyMjIzLzUtTmV0UHJvZ3JhbW1pbmcv
+			ZWNoby9lY2hvdGNwMi1zZXJ2ZXItdGhyZWFkLnB5CjQJL2hvbWUvZC50dXJjbzEv
+			aHRtbC9SRVRJMjIyMy81LU5ldFByb2dyYW1taW5nL2VjaG8vZWNob3RjcDItY2xp
+			ZW50LnB5CjQJL2hvbWUvZC50dXJjbzEvaHRtbC9SRVRJMjIyMy81LU5ldFByb2dy
+			YW1taW5nL2VjaG8vZWNob3RjcC1zZXJ2ZXItdGhyZWFkLnB5CjQJL2hvbWUvZC50
+			dXJjbzEvaHRtbC9SRVRJMjIyMy81LU5ldFByb2dyYW1taW5nL2VjaG8vZWNob3Rj
+			cC1jbGllbnQucHkKMTYJL2hvbWUvZC50dXJjbzEvaHRtbC9SRVRJMjIyMy81LU5l
+			dFByb2dyYW1taW5nL2VjaG8KNAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEkyMjIz
+			LzUtTmV0UHJvZ3JhbW1pbmcvZGdyYW0vZWNob19zZXJ2ZXIucHkKNAkvaG9tZS9k
+			LnR1cmNvMS9odG1sL1JFVEkyMjIzLzUtTmV0UHJvZ3JhbW1pbmcvZGdyYW0vZWNo
+			b19jbGllbnQucHkKNAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEkyMjIzLzUtTmV0
+			UHJvZ3JhbW1pbmcvZGdyYW0vZGdyYW1fc2VydmVyLnB5CjQJL2hvbWUvZC50dXJj
+			bzEvaHRtbC9SRVRJMjIyMy81LU5ldFByb2dyYW1taW5nL2RncmFtL2RncmFtX2Ns
+			aWVudC5weQoxNgkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEkyMjIzLzUtTmV0UHJv
+			Z3JhbW1pbmcvZGdyYW0KMTIJL2hvbWUvZC50dXJjbzEvaHRtbC9SRVRJMjIyMy81
+			LU5ldFByb2dyYW1taW5nLzUtTmV0UHJvZ3JhbW1pbmcudHh0CjYwCS9ob21lL2Qu
+			dHVyY28xL2h0bWwvUkVUSTIyMjMvNS1OZXRQcm9ncmFtbWluZwo4CS9ob21lL2Qu
+			dHVyY28xL2h0bWwvUkVUSTIyMjMvNi1XV1cvbmdpbngtY2dpLnR4dAo0CS9ob21l
+			L2QudHVyY28xL2h0bWwvUkVUSTIyMjMvNi1XV1cvbmdpbngtUEhQLnR4dAo0CS9o
+			b21lL2QudHVyY28xL2h0bWwvUkVUSTIyMjMvNi1XV1cvbmdpbngtcmV2ZXJzZV9w
+			cm94eS50eHQKNAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEkyMjIzLzYtV1dXL25n
+			aW54LXZpcnR1YWxfaG9zdC50eHQKNAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEky
+			MjIzLzYtV1dXL3Rlc3QucHkKNAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEkyMjIz
+			LzYtV1dXL2NsaWVudC13d3cudHh0CjQJL2hvbWUvZC50dXJjbzEvaHRtbC9SRVRJ
+			MjIyMy82LVdXVy9uZ2lueC1hdXRlbnRpY2F6aW9uZS50eHQKMzIJL2hvbWUvZC50
+			dXJjbzEvaHRtbC9SRVRJMjIyMy82LVdXVwoyMAkvaG9tZS9kLnR1cmNvMS9odG1s
+			L1JFVEkyMjIzLzctRG9ja2VyTmV0d29ya2luZy50eHQKOAkvaG9tZS9kLnR1cmNv
+			MS9odG1sL1JFVEkyMjIzLzgtRG9ja2VyRmlyZXdhbGwudHh0CjQJL2hvbWUvZC50
+			dXJjbzEvaHRtbC9SRVRJMjIyMy85LW9wZW5TU0wvdHVyY29fcnNhX2tleS5wZW0K
+			NAkvaG9tZS9kLnR1cmNvMS9odG1sL1JFVEkyMjIzLzktb3BlblNTTC90dXJjb19y
+			c2FfcHViLnBlbQo0CS9ob21lL2QudHVyY28xL2h0bWwvUkVUSTIyMjMvOS1vcGVu
+			U1NML3RvZW5jcnlwdC50eHQKMTIJL2hvbWUvZC50dXJjbzEvaHRtbC9SRVRJMjIy
+			My85LW9wZW5TU0wKMTYwCS9ob21lL2QudHVyY28xL2h0bWwvUkVUSTIyMjMvCg==
+	
+	- enc significa cifrare,-aes256 è l'algoritmo di cifratura utilizzato;
+	- come chiave di cifratura utilizzo il mio cognome in minuscolo.
+		> openssl enc -e -a -aes256 -in toencrypt.txt -out toencrypt.aes256
+			enter aes-256-cbc encryption password:
+			Verifying - enter aes-256-cbc encryption password:
+			*** WARNING : deprecated key derivation used.
+			Using -iter or -pbkdf2 would be better.
+		> cat toencrypt.aes256
+			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
+			ufEKlOIB5MOsIIuNDrTabg==
+
+	- SHA-1 (Secure Hash Algorithm) is a cryptographic hash function with a 160 bit output.
+		> openssl sha1 -hex toencrypt.txt > toencrypt.sha1
+		> cat toencrypt.sha1
+			SHA1(toencrypt.txt)= 8386d0fcf166dec919b261446f08241f8ad22bd5
+	
+
+ -hmac val           Create hashed MAC with key
+ -sign                    Sign with private key
+ -inkey val               Input key
+
+ -pubin                   Input is an RSA public
+
+
+	- dgest mi serve per eseguire operazioni di dgst;
+	- -sha256 è l'algoritmo della firma;
+	- l'opzione -hmac permette di creare un hash MAC "turco" come chiave.
+		> openssl dgst -sha256 -hmac turco toencrypt.txt > toencrypt.hmac
+		> cat toencrypt.hmac
+			HMAC-SHA256(toencrypt.txt)= 0b753ee9f7fd2fbbf1fe766d3ac9dd6cf2a3d0e8e8aef9f88dc3f4a10f3d613c
+	
+	- il flag -sign serve per firmare i dati di input e generare il risultato firmato. Ciò richiede una chiave privata RSA.
+	- Questa operazione non posso eseguirla con il file "toencrypt.txt", quindi la eseguo con un file di   
+	  minori dimensioni "toencrypt_shortVersion.txt" (di lunghezza una sola linea di testo).
+	- (firmato con la mia chiave privata RSA).
+		> cat toencrypt_shortVersion.txt
+			160     /home/d.turco1/html/RETI2223/ 
+		> openssl rsautl -sign -inkey turco_rsa_key.pem -in toencrypt_shortVersion.txt -out toencrypt.rsa_sign
+		> cat toencrypt_shortVersion.txt
+			160     /home/d.turco1/html/RETI2223/	
+
+	- il flag -encrypt serve per crittografare i dati di input utilizzando una chiave pubblica RSA.
+	- (cifrato la chiave pubblica RSA del docente).
+		> openssl rsautl -encrypt -pubin -inkey alfieri_rsa_pub.pem -in toencrypt_shortVersion.txt -out toencrypt.rsa_crypt
+		> cat toencrypt.rsa_crypt
+			▒]4▒Iܓ▒I`▒▒:z▒▒ߣA8▒Y▒¶F#▒ػ▒▒!U2▒▒▒F▒fs▒-▒▒▒▒r[▒▒E▒OR▒▒▒..▒@]▒CB:▒▒▒▒▒Y▒d▒▒52▒>s▒F▒▒-7▒P$▒h▒ًG}▒▒▒s▒Q▒4V▒▒▒▒▒<    (K▒▒mp▒
+			▒%S▒o▒#rza▒G▒▒▒▒▒▒▒▒C▒▒l#▒▒▒▒▒'Բ        ▒^▒!pe▒$0▒?▒Gѭ▒/ȁ▒▒}▒▒d▒▒▒
+
+
+	
+4. Creo il Message Digest "toencrypt.sha1_signed" firmato con la chiave RSA privata e 
+verifico il Digest con lachiave pubblica.
+	
+	> openssl dgst -sha1 -sign turco_rsa_key.pem -out toencrypt.sha1_signed toencrypt_shortVersion.txt
+	> openssl dgst -sha1 -verify turco_rsa_pub.pem -signature toencrypt.sha1_signed toencrypt_shortVersion.txt
+		Verified OK

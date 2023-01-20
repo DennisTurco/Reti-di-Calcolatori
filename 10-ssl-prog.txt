@@ -1,0 +1,42 @@
+Autore = Dennis Turco
+
+################################################ Programmazione SSL in Python ################################################
+
+	- entro in nginx2:
+	> sudo docker exec -it nginx2 bash
+		- da dentro la bash di nginx2 scarico il file con wget:
+		> wget http://didattica-linux.unipr.it/~roberto.alfieri@unipr.it/matdid/RETI/security/python/https_client.py
+		
+			--2022-12-25 18:44:57--  http://didattica-linux.unipr.it/~roberto.alfieri@unipr.it/matdid/RETI/security/python/https_client.py
+			Resolving didattica-linux.unipr.it (didattica-linux.unipr.it)... 160.78.50.165
+			Connecting to didattica-linux.unipr.it (didattica-linux.unipr.it)|160.78.50.165|:80... connected.
+			HTTP request sent, awaiting response... 200 OK
+			Length: 700 [text/x-python]
+			Saving to: 'https_client.py'
+
+			https_client.py             100%[===========================================>]     700  --.-KB/s    in 0s      
+
+			2022-12-25 18:44:57 (153 MB/s) - 'https_client.py' saved [700/700]
+		
+		- verifico la presenza del file:
+		> ls
+			bin   docker-entrypoint.d   home	     lib64  opt		root  srv  usr
+			boot  docker-entrypoint.sh  https_client.py  media  proc	run   sys  var
+			dev   etc		    lib		     mnt    prova.html	sbin  tmp
+		
+		- modifico il file appena scaricato (https_client.py):
+		> nano https_client.py
+		
+		- runno il programma:
+		> python2 https_client.py
+			('192.168.0.4', 443)
+			('TLS_AES_256_GCM_SHA384', 'TLSv1.3', 256)
+			HTTP/1.1 200 OK
+			Server: nginx/1.23.2
+			Date: Sun, 25 Dec 2022 18:51:52 GMT
+			Content-Type: text/html
+			Content-Length: 41
+			...
+
+			<h1> HTTPS funziona correttamente! </h1>
+

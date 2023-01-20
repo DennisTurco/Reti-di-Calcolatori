@@ -14,7 +14,7 @@ surname = "Turco"
 parser = optparse.OptionParser()
 parser.add_option('-s', '--server',  dest="server",  default="localhost", help="server name" )
 parser.add_option('-p', '--port',    dest="port",    type=int,  default=10102, help="server listening port" )
-parser.add_option('-m', '--message', dest="message", default=f"hello from {name} {surname}, in python", help="message to send" )
+parser.add_option('-m', '--message', dest="message", default=f"hello from {name} {surname}, in python".encode('utf-8'), help="message to send" )
 options, remainder = parser.parse_args()
 print("OPTIONS  server:", options.server, " - port:", options.port, " - message:", options.message)
 

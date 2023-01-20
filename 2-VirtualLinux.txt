@@ -1,0 +1,48 @@
+Autore: Dennis Turco
+
+PUNTO 1:    Seguendo i link guida presenti su elly 2022 ho installato Ubuntu e VirtualBox, 
+            successivamente ho creato una macchina virtuale ed ho inserito al suo interno Ubuntu 20.04.
+            Ho installato anche Ubuntu-20.04 tramite PowerShell di Windows tramite il comando: wsl --install -d Ubuntu-20.04
+
+PUNTO 2:    Ho installato tutti i pacchetti per la rete elencati su elly 2022, incluso SSH.
+            comandi:
+                sudo apt install traceroute
+                sudo apt install whois
+                sudo apt install nmap
+                sudo apt install wget
+                sudo apt install curl
+                sudo apt install tcpdump
+                sudo apt install wireshark
+                sudo apt install tshark
+                sudo apt install net-tools 
+            le seguenti installazioni sono avvenute tutte con successo (alcune erano gia' installate)'.
+
+PUNTO 3:    Ho installato Docker seguendo i link di elly 2022;
+            comandi effettuati:
+                sudo apt-get update
+                sudo apt-get install \
+                    ca-certificates \
+                    curl \
+                    gnupg \
+                    lsb-release
+                sudo mkdir -p /etc/apt/keyrings
+                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+                echo \
+                    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+                    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+                sudo apt-get update
+                sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+                sudo service docker start
+                sudo docker run hello-world
+
+            Come richiesta da consegna ho fatto il pull dell'immagine Alpine Linux:
+            (eseguo tutti i comandi con privilegio "sudo")
+            comandi effettuati:
+                sudo docker pull alpine
+                sudo docker run alpine
+                sudo docker ps -a       #per verificare che tutto e' andato a buon fine
+
+                output: 
+                    CONTAINER ID   IMAGE         COMMAND     CREATED              STATUS                          PORTS     NAMES
+                    91c1122a84ec   alpine        "/bin/sh"   29 minutes ago       Exited (0) About a minute ago             relaxed_roentgen
+                    869994b6d398   hello-world   "/hello"    35 minutes ago       Exited (0) 4 minutes ago                  busy_taussing

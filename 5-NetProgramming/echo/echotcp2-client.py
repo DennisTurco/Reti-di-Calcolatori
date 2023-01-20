@@ -23,7 +23,7 @@ s = socket(AF_INET,SOCK_STREAM)
 
 s.connect(addr)
 
-print ("Connected to server ", addr) 
+print ("Connected to server: ", addr) 
 messaggio = input('message (q to quit) > ')
 while messaggio.upper() != 'Q' and len(messaggio) > 0:
 	s.send(messaggio.encode())

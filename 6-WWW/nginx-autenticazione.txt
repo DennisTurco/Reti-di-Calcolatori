@@ -2,6 +2,11 @@ Autore = Dennis Turco
 
 ############################################## AUTENTICAZIONE DI BASE ###################################
 
+
+htpasswd - Manage user files for basic authentication
+-c     Create  the  passwdfile. If passwdfile already exists, it is rewritten and truncated.
+
+
 - Installazioni e Configurazione:
 	1. ho installato apache2-utils con: sudo apt install apache2-utils
 	2. sudo htpasswd -c /etc/nginx/.htpasswd ubuntu --> ho messo password "ubuntu" 

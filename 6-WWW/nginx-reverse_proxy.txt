@@ -16,7 +16,7 @@ Autore = Dennis Turco
 	  	....
 	  	server {
         		listen 80 default_server;
-                        listen [::]:80 default_server;  
+                        listen [::]:80 default_server;                     ????????????????? 80 o 81???
   
 			root /var/www/html;     
 
@@ -70,3 +70,5 @@ Autore = Dennis Turco
 		<p><em>Thank you for using nginx.</em></p>
 		</body>
 		</html>
+
+Nel nostro esempio, il server Nginx funzionerà come proxy e invierà tutte le richieste al server remoto.
